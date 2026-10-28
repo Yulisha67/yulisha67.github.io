@@ -1096,7 +1096,7 @@ rib.addEventListener('click',e=>{if(moved>6){e.preventDefault();e.stopPropagatio
 /* viewer */
 const FD={"jimmy-f1.webp": [710, 540], "jimmy-f2.webp": [710, 540], "jimmy-f3.webp": [710, 540], "jimmy-f4.webp": [710, 540], "jimmy-f5.webp": [710, 540], "jimmy-f6.webp": [1568, 603], "jimmy-f7.webp": [1568, 716], "un1t-a1.webp": [724, 1568], "un1t-a2.webp": [724, 1568], "un1t-a3.webp": [724, 1568], "un1t-a4.webp": [724, 1568], "un1t-a5.webp": [724, 1568], "un1t-a6.webp": [724, 1568]};
 const dlg=document.getElementById('viewer');let ci=0;
-const isV=f=>/\.mp4$/i.test(f);const med=(f,a='')=>isV(f)?`<video src="img/${f}" poster="img/${f.replace(/\.mp4$/i,'.webp')}" autoplay muted loop playsinline ${a}></video>`:`<img src="img/${f}" ${a}>`;const zoomOf=f=>{const v=f.querySelector('video');return v?`<video src="${v.getAttribute('src')}" autoplay muted loop playsinline controls></video>`:`<img src="${f.querySelector('img').src}" alt="">`};
+const isV=f=>/\.mp4$/i.test(f);const pic=(f,a='')=>`<img src="img/${isV(f)?f.replace(/\.mp4$/i,'.webp'):f}" ${a}>`;const med=(f,a='')=>isV(f)?`<video src="img/${f}" poster="img/${f.replace(/\.mp4$/i,'.webp')}" autoplay muted loop playsinline preload="metadata" ${a}></video>`:`<img src="img/${f}" ${a}>`;const zoomOf=f=>{const v=f.querySelector('video');return v?`<video src="${v.getAttribute('src')}" autoplay muted loop playsinline controls></video>`:`<img src="${f.querySelector('img').src}" alt="">`};
 function openP(i){ci=(i+P.length)%P.length;const p=P[ci],c=CS[p.id]||{imgs:[],pal:[]},im=c.imgs||[];
   const pal=c.pal&&c.pal.length?c.pal:['#ffd0e4','#d9ccff'];const vb=document.getElementById('v-body');
   const light=h=>{const n=parseInt(h.slice(1),16);return((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000>150};
@@ -1127,7 +1127,7 @@ function openP(i){ci=(i+P.length)%P.length;const p=P[ci],c=CS[p.id]||{imgs:[],pa
   /* 3D hero: a browser for wide shots, phones for tall ones, chips floating in front */
   const sc=document.getElementById('v-scene'),v3=document.getElementById('v3d');v3.classList.remove('in');
   const wide=im.filter(x=>!isV(x[0])&&x[1]/x[2]>1.15),tall=im.filter(x=>!isV(x[0])&&x[2]/x[1]>1.4),sq=im.filter(x=>!isV(x[0])&&!wide.includes(x)&&!tall.includes(x));
-  let L=[];const lay=(cls,f,t)=>L.push(`<div class="dv ${cls}" style="transform:${t}">${f?med(f,'alt=""'):''}</div>`);
+  let L=[];const lay=(cls,f,t)=>L.push(`<div class="dv ${cls}" style="transform:${t}">${f?pic(f,'alt=""'):''}</div>`);
   if(wide.length){lay('br',wide[0][0],'translate3d(0,0,0)');(tall.length?tall:sq).slice(0,2).forEach((x,k)=>lay(tall.length?'ph':'sq',x[0],(c.heroT&&c.heroT[k])||(k?'translate3d(-46%,8%,-160px) rotateY(10deg) scale(.8)':'translate3d(12%,4%,140px) rotateY(-8deg) scale(.85)')));if(!tall.length&&!sq.length&&wide[1])lay('br top',wide[1][0],'translate3d(30%,12%,180px) scale(.55)')}
   else if(tall.length){tall.slice(0,3).forEach((x,k)=>lay('ph',x[0],['translate3d(0,0,80px)','translate3d(-120%,6%,-60px) rotateY(16deg)','translate3d(120%,6%,-60px) rotateY(-16deg)'][k]))}
   else sq.slice(0,3).forEach((x,k)=>lay('sq',x[0],['translate3d(0,0,60px)','translate3d(-62%,10%,-120px) rotateZ(-6deg)','translate3d(62%,-6%,-120px) rotateZ(6deg)'][k]));
@@ -1143,8 +1143,8 @@ function openP(i){ci=(i+P.length)%P.length;const p=P[ci],c=CS[p.id]||{imgs:[],pa
   hsBuild(im,p.t);
   /* screens deck: the real screens stacked, drag or tap the top one away */
   deckList=im.slice();deckI=0;deckRender(p.t);
-  document.getElementById('v-thumbs').innerHTML=im.slice(1,1+(c.strip??3)).map((x,k)=>`<figure${c.phones?' class="fph"':''}>${med(x[0],`width="${x[1]}" height="${x[2]}" alt="${p.t}, screen ${k+1}" loading="lazy"`)}</figure>`).join('');
-  document.getElementById('v-simn').textContent=`${pad(im.length)} screens`;
+  const stripL=(l=>l.some(x=>isV(x[0]))?l.filter(x=>isV(x[0])):l)(im.slice(1,1+(c.strip??3)));document.getElementById('v-thumbs').innerHTML=stripL.map((x,k)=>`<figure${c.phones?' class="fph"':''}>${med(x[0],`width="${x[1]}" height="${x[2]}" alt="${p.t}, screen ${k+1}" loading="lazy"`)}</figure>`).join('');
+  document.getElementById('v-simn').textContent=stripL.some(x=>isV(x[0]))?'Walkthrough':`${pad(im.length)} screens`;
   /* screens: every real screen of the project, feature screens with their caption */
   const seen=new Set(),pool=[];const add=(x,cap)=>{if(!x||seen.has(x[0]))return;seen.add(x[0]);pool.push([...x,cap])};
   const heroSet=new Set([...sc.querySelectorAll('img')].map(i=>i.getAttribute('src').replace('img/','')));
@@ -1172,7 +1172,7 @@ function openP(i){ci=(i+P.length)%P.length;const p=P[ci],c=CS[p.id]||{imgs:[],pa
   const gal=document.getElementById('v-gal');gal.innerHTML=im.map((x,k)=>`<figure>${med(x[0],`width="${x[1]}" height="${x[2]}" alt="${p.t}, screen ${k+1}" loading="lazy"`)}</figure>`).join('');
   gal.querySelectorAll('figure').forEach(f=>gio.observe(f));
   const np=P[(ci+1)%P.length],nc=CS[np.id];document.getElementById('v-nt').textContent=np.t;
-  document.getElementById('v-nc').innerHTML=nc&&nc.imgs[0]?`${med(nc.imgs[0][0],'alt=""')}`:'';
+  document.getElementById('v-nc').innerHTML=nc&&nc.imgs[0]?`${pic(nc.imgs[0][0],'alt=""')}`:'';
   document.getElementById('v-wrap').scrollTop=0;if(!dlg.open)dlg.showModal();if(window.lenis)lenis.stop()}
 let deckList=[],deckI=0,deckTitle='';
 function deckRender(t){if(t!==undefined)deckTitle=t;const st=document.getElementById('v-trk'),n=deckList.length;
