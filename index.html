@@ -792,12 +792,13 @@ dialog.viewer[open]{animation:pop .6s cubic-bezier(.2,.8,.1,1)}
 .sm-shots figure:has(video){grid-column:1/-1}
 /* v25: mobile case pages — bigger screens, even gutters, tidier cards */
 @media (max-width:620px){
-  .v3d{height:min(80vw,380px);margin-top:4px}
-  .scene{--rx:9deg;--ry:-9deg}
-  .dv.br{width:92vw;margin:calc(92vw*-.3125) 0 0 calc(92vw*-.5);padding-top:18px;border-radius:14px}
-  .dv.ph{width:27vw;margin:calc(27vw*-1.055) 0 0 calc(27vw*-.5);border-width:5px;border-radius:22px}
-  .dv.sq{width:52vw;margin:calc(52vw*-.5) 0 0 calc(52vw*-.5)}
-  .dv.br.top{width:48vw;margin:calc(48vw*-.3125) 0 0 calc(48vw*-.5);transform:translate3d(28%,38%,120px)!important}
+  .v3d{height:auto;margin-top:10px;perspective:none;padding:18px 0 6px}
+  .v-glow{inset:6% 4%}
+  .scene.flat{position:relative;left:auto;top:auto;width:auto;height:auto;transform:none!important;display:flex;gap:10px;justify-content:center;align-items:flex-start;padding:0 var(--gl)}
+  .scene.flat .dv{position:static;margin:0;transform:none!important;box-shadow:0 24px 50px -24px rgba(30,20,60,.5)}
+  .scene.flat .dv.br{width:100%;aspect-ratio:16/10;padding-top:16px;border-radius:14px}
+  .scene.flat .dv.ph{flex:0 1 31%;width:31%;aspect-ratio:9/19;border-width:5px;border-radius:22px}
+  .scene.flat .dv.sq{flex:0 1 48%;width:48%;aspect-ratio:1;border-radius:16px}
   .cs-hero2{margin-top:28px}
   .cs-facts{grid-template-columns:1fr 1fr;gap:0 16px;margin-top:26px}
   .cs-facts div{padding:12px 0 4px}
@@ -1112,6 +1113,8 @@ function openP(i){ci=(i+P.length)%P.length;const p=P[ci],c=CS[p.id]||{imgs:[],pa
   else if(tall.length){tall.slice(0,3).forEach((x,k)=>lay('ph',x[0],['translate3d(0,0,80px)','translate3d(-120%,6%,-60px) rotateY(16deg)','translate3d(120%,6%,-60px) rotateY(-16deg)'][k]))}
   else sq.slice(0,3).forEach((x,k)=>lay('sq',x[0],['translate3d(0,0,60px)','translate3d(-62%,10%,-120px) rotateZ(-6deg)','translate3d(62%,-6%,-120px) rotateZ(6deg)'][k]));
   (p.tags||[]).slice(0,3).forEach((t,k)=>L.push(`<div class="dv chip" style="transform:translate3d(calc(${[-30,18,-6][k]}vw - 50%),${[-150,-190,160][k]}px,${[220,260,300][k]}px)">✦ ${t}</div>`));
+  const flat=matchMedia('(max-width:620px)').matches;sc.classList.toggle('flat',flat);
+  if(flat){L=[];if(wide.length)lay('br',wide[0][0],'none');else if(tall.length)tall.slice(0,3).forEach(x=>lay('ph',x[0],'none'));else sq.slice(0,2).forEach(x=>lay('sq',x[0],'none'))}
   sc.innerHTML=L.join('');requestAnimationFrame(()=>requestAnimationFrame(()=>v3.classList.add('in')));
   /* at a glance: only facts we know */
   const deliver=(p.tags||[]);
